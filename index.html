@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+  <title>Pool & Biljart Scoreboard</title>
+  
+  <!-- PWA & Android Meta Tags -->
+  <meta name="theme-color" content="#0d131a" />
+  <meta name="description" content="Professionele scoreteller & match timer voor poolen, 8-ball en biljart." />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="PoolScore" />
+  
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header class="app-header">
+    <div class="header-brand">
+      <img src="icons/icon.svg" alt="Logo" class="app-logo" />
+      <div class="app-title-group">
+        <div class="app-title">Pool & Biljart</div>
+        <div class="app-subtitle" id="headerSubtitle">Ronde 1 • Match Bezig</div>
+      </div>
+    </div>
+    
+    <div class="header-actions">
+      <!-- Android install button (dynamic) -->
+      <button class="header-btn install-btn" id="installAppBtn" title="Installeer op Android">
+        <span>📲</span>
+        <span>App</span>
+      </button>
+
+      <!-- Wake Lock Screen Keep-Awake toggle -->
+      <button class="header-btn icon-btn-only" id="wakeLockBtn" title="Scherm aanhouden">
+        <span id="wakeLockIcon">💡</span>
+      </button>
+
+      <!-- Fullscreen Toggle -->
+      <button class="header-btn icon-btn-only" id="fullscreenBtn" title="Volledig scherm">
+        <span>⛶</span>
+      </button>
+
+      <!-- Match History -->
+      <button class="header-btn icon-btn-only" id="openHistoryBtn" title="Wedstrijdgeschiedenis & Statistieken">
+        <span>📊</span>
+      </button>
+
+      <!-- Settings -->
+      <button class="header-btn icon-btn-only" id="openSettingsBtn" title="Instellingen">
+        <span>⚙️</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Scrollable Arena -->
+  <main class="main-wrapper">
+
+    <!-- Tournament Overview Bar -->
+    <div class="tournament-bar">
+      <div class="tournament-stand" id="tournamentStandText">
+        🏆 Stand: <strong id="tournP1Name">Rignald</strong> <span id="tournP1Wins">0</span> - <span id="tournP2Wins">0</span> <strong id="tournP2Name">Shuhung</strong>
+      </div>
+      <div class="tournament-chips">
+        <div class="tournament-chip" id="tournamentTargetBadge">Doel: 5 potjes</div>
+        <div class="tournament-chip" id="gameModeBadge">🎱 8-Ball</div>
+      </div>
+    </div>
+
+    <!-- Arena Container (Player 1 - Timer - Player 2) -->
+    <div class="arena-container">
+      
+      <!-- Player 1 Card -->
+      <section class="player-card p1" id="player1Card">
+        <div class="player-header" id="p1HeaderBtn" title="Speler 1 aanpassen">
+          <div class="player-info-left">
+            <span class="player-emoji" id="p1Emoji">🐸</span>
+            <div class="player-name-wrap">
+              <span class="player-name" id="p1Name">Rignald</span>
+              <span class="player-wins-badge" id="p1WinsText">0 potjes gewonnen</span>
+            </div>
+          </div>
+          <span class="edit-hint">✏️</span>
+        </div>
+
+        <div class="player-score-area">
+          <div class="player-score-value" id="p1Score" title="Klik om punt te tellen">0</div>
+          
+          <div class="player-foul-actions">
+            <div class="foul-buttons-row">
+              <button class="foul-btn" id="p1EightballBtn" title="8-Ball Fout (strafpunt naar tegenstander)">🎱</button>
+              <button class="foul-btn white-ball" id="p1WhiteballBtn" title="Speelbal Fout / Scratch">⚪</button>
+            </div>
+            <div class="foul-badges-list" id="p1FoulList"></div>
+          </div>
+        </div>
+
+        <div class="player-quick-btns">
+          <button class="action-btn btn-point-add" id="p1AddPointBtn">+1 Punt</button>
+          <button class="action-btn btn-point-undo" id="p1UndoPointBtn" title="Punt ongedaan maken">↶ Herstel</button>
+        </div>
+      </section>
+
+      <!-- Central Timer Hub -->
+      <section class="timer-hub">
+        <div class="timer-digits-wrap">
+          <div class="timer-digits" id="timerDigits" title="Klik om timer te starten/pauzeren">02:00:00</div>
+          <div class="timer-status-pill" id="timerStatusPill">Gereed</div>
+        </div>
+
+        <div class="timer-actions-row">
+          <button class="timer-btn-primary" id="timerToggleBtn" title="Start of Pauzeer">
+            <span id="timerPlayIcon">▶️</span>
+            <span id="timerPlayText">Start</span>
+          </button>
+          
+          <button class="timer-btn-secondary" id="timerResetBtn" title="Reset timer">
+            <span>⟲</span>
+          </button>
+          
+          <button class="timer-btn-secondary" id="openTimerModalBtn" title="Timer instellen">
+            <span>⏱️</span>
+          </button>
+
+          <button class="timer-btn-secondary" id="globalUndoBtn" title="Krijtje: Laatste actie ongedaan maken">
+            <span>🪶</span>
+          </button>
+        </div>
+
+        <div class="game-hub-btns">
+          <button class="game-hub-btn btn-new-rack" id="newRackBtn" title="Begin volgend potje">
+            <span>🆕</span>
+            <span>Nieuw Potje</span>
+          </button>
+          <button class="game-hub-btn btn-end-match" id="endMatchBtn" title="Voltooi wedstrijd en sla op">
+            <span>🏁</span>
+            <span>Einde Match</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Player 2 Card -->
+      <section class="player-card p2" id="player2Card">
+        <div class="player-header" id="p2HeaderBtn" title="Speler 2 aanpassen">
+          <div class="player-info-left">
+            <span class="player-emoji" id="p2Emoji">🐄</span>
+            <div class="player-name-wrap">
+              <span class="player-name" id="p2Name">Shuhung</span>
+              <span class="player-wins-badge" id="p2WinsText">0 potjes gewonnen</span>
+            </div>
+          </div>
+          <span class="edit-hint">✏️</span>
+        </div>
+
+        <div class="player-score-area">
+          <div class="player-score-value" id="p2Score" title="Klik om punt te tellen">0</div>
+          
+          <div class="player-foul-actions">
+            <div class="foul-buttons-row">
+              <button class="foul-btn" id="p2EightballBtn" title="8-Ball Fout (strafpunt naar tegenstander)">🎱</button>
+              <button class="foul-btn white-ball" id="p2WhiteballBtn" title="Speelbal Fout / Scratch">⚪</button>
+            </div>
+            <div class="foul-badges-list" id="p2FoulList"></div>
+          </div>
+        </div>
+
+        <div class="player-quick-btns">
+          <button class="action-btn btn-point-add" id="p2AddPointBtn">+1 Punt</button>
+          <button class="action-btn btn-point-undo" id="p2UndoPointBtn" title="Punt ongedaan maken">↶ Herstel</button>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Live Event Timeline -->
+    <div class="timeline-section">
+      <div class="timeline-header">
+        <span class="timeline-title">📊 Live Score Verloop (Dit potje)</span>
+        <span id="timelineCountText" style="font-size: 11px; color: var(--text-muted);">0 gebeurtenissen</span>
+      </div>
+      <div class="timeline-scroll" id="liveTimelineScroll">
+        <div style="color: var(--text-muted); font-size: 12px; padding: 4px 0;">Nog geen punten gescoord in dit potje...</div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- 1. Player Customization Modal -->
+  <div class="modal-backdrop" id="playerModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title" id="playerModalTitle">Speler Aanpassen</div>
+        <button class="modal-close-btn" id="closePlayerModalBtn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="editPlayerNameInput">Naam van de speler</label>
+          <input type="text" class="form-input" id="editPlayerNameInput" placeholder="Bijv. Rignald" maxlength="25" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Kies een avatar / emoji</label>
+          <div class="emoji-picker-grid" id="emojiPickerGrid"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Kaartkleur (Gradiënt)</label>
+          <div class="color-picker-grid" id="colorPickerGrid"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelPlayerModalBtn">Annuleren</button>
+        <button class="btn-primary" id="savePlayerModalBtn">Opslaan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Timer & Audio Settings Modal -->
+  <div class="modal-backdrop" id="timerModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title">⏱️ Timer & Instellingen</div>
+        <button class="modal-close-btn" id="closeTimerModalBtn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Timer Duur</label>
+          <div class="form-row-3">
+            <div>
+              <label class="toggle-desc">Uren</label>
+              <input type="number" class="form-input" id="timerHoursInput" min="0" max="23" value="2" />
+            </div>
+            <div>
+              <label class="toggle-desc">Minuten</label>
+              <input type="number" class="form-input" id="timerMinutesInput" min="0" max="59" value="0" />
+            </div>
+            <div>
+              <label class="toggle-desc">Seconden</label>
+              <input type="number" class="form-input" id="timerSecondsInput" min="0" max="59" value="0" />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Snelle Voorinstellingen</label>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+            <button class="header-btn" onclick="window.setTimerPreset(15)">15 Min</button>
+            <button class="header-btn" onclick="window.setTimerPreset(30)">30 Min</button>
+            <button class="header-btn" onclick="window.setTimerPreset(60)">1 Uur</button>
+            <button class="header-btn" onclick="window.setTimerPreset(120)">2 Uur</button>
+          </div>
+        </div>
+
+        <hr style="border: none; border-top: 1px solid var(--border-color); margin: 16px 0;" />
+
+        <div class="form-group">
+          <label class="form-label">Geluid & Dempen</label>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Geluidseffecten (Audio)</div>
+              <div class="toggle-desc">Speel biljartbal effecten bij scores en fouten</div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="soundMasterToggle" checked />
+              <span class="switch-slider"></span>
+            </label>
+          </div>
+
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Stem-omroeper (Nederlands)</div>
+              <div class="toggle-desc">Roept de stand automatisch om ("Rignald 3, Shuhung 2")</div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="voiceAnnounceToggle" />
+              <span class="switch-slider"></span>
+            </label>
+          </div>
+
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Trillen bij score (Haptic)</div>
+              <div class="toggle-desc">Laat Android telefoon kort trillen bij een punt</div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="hapticToggle" checked />
+              <span class="switch-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="soundVolumeSlider">Volumesterkte</label>
+          <input type="range" class="form-input" id="soundVolumeSlider" min="0" max="100" value="80" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelTimerModalBtn">Annuleren</button>
+        <button class="btn-primary" id="saveTimerModalBtn">Toepassen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Global Settings & Spelregels Modal -->
+  <div class="modal-backdrop" id="settingsModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title">⚙️ Algemene Instellingen</div>
+        <button class="modal-close-btn" id="closeSettingsModalBtn">&times;</button>
+      </div>
+      <div class="modal-body">
+        
+        <div class="form-group">
+          <label class="form-label">Spelmodus</label>
+          <select class="form-select" id="gameModeSelect">
+            <option value="pool-8ball">🎱 8-Ball Pool (Punten + 8-Ball Fouten)</option>
+            <option value="pool-9ball">🟡 9-Ball Pool</option>
+            <option value="biljart-libre">🔴⚪ Biljarten Libre / Driebanden (Caramboles)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Toernooi Winstdoel (Aantal potjes)</label>
+          <select class="form-select" id="tournamentTargetSelect">
+            <option value="3">Best of 5 (Eerste tot 3 gewonnen potjes)</option>
+            <option value="5" selected>Eerste tot 5 gewonnen potjes</option>
+            <option value="7">Best of 13 (Eerste tot 7 gewonnen potjes)</option>
+            <option value="10">Eerste tot 10 gewonnen potjes</option>
+            <option value="0">Vrij spel (Geen toernooilimiet)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">8-Ball Fout Regel</label>
+          <select class="form-select" id="eightballRuleSelect">
+            <option value="1">+1 Punt voor tegenstander + Fout-telling</option>
+            <option value="2">+2 Punten voor tegenstander + Fout-telling</option>
+            <option value="0">Alleen Fout-telling (Geen automatische punten)</option>
+          </select>
+        </div>
+
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-label">Timer automatisch resetten</div>
+            <div class="toggle-desc">Reset klok naar starttijd bij elk nieuw potje</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="autoResetTimerToggle" checked />
+            <span class="switch-slider"></span>
+          </label>
+        </div>
+
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-label">Scherm altijd aanhouden (Wake Lock)</div>
+            <div class="toggle-desc">Voorkomt dat het scherm van je telefoon dimt tijdens een match</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="wakeLockSettingToggle" checked />
+            <span class="switch-slider"></span>
+          </label>
+        </div>
+
+        <hr style="border: none; border-top: 1px solid var(--border-color); margin: 16px 0;" />
+
+        <div class="form-group">
+          <label class="form-label">Gegevensbeheer</label>
+          <div style="display: flex; gap: 8px;">
+            <button class="header-btn" id="exportDataBtn">💾 Exporteer Backup (JSON)</button>
+            <button class="header-btn" id="importDataBtn">📥 Importeer</button>
+            <input type="file" id="importFileInput" accept=".json" style="display: none;" />
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelSettingsModalBtn">Sluiten</button>
+        <button class="btn-primary" id="saveSettingsModalBtn">Opslaan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Match History & Statistics Modal -->
+  <div class="modal-backdrop" id="historyModal">
+    <div class="modal-dialog" style="max-width: 600px;">
+      <div class="modal-header">
+        <div class="modal-title">📊 Wedstrijdgeschiedenis & Stats</div>
+        <button class="modal-close-btn" id="closeHistoryModalBtn">&times;</button>
+      </div>
+      <div class="modal-body">
+        
+        <!-- Quick Head to Head Stats -->
+        <div style="background: rgba(0,0,0,0.3); border-radius: var(--radius-md); padding: 12px; margin-bottom: 16px; border: 1px solid var(--border-color);">
+          <div style="font-size: 12px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 8px;">Onderlinge Statistieken</div>
+          <div style="display: flex; justify-content: space-around; text-align: center;">
+            <div>
+              <div style="font-size: 24px; font-weight: 900; color: #38bdf8;" id="statsP1Wins">0</div>
+              <div style="font-size: 11px; color: var(--text-muted);" id="statsP1Label">Speler 1 Wins</div>
+            </div>
+            <div style="border-left: 1px solid var(--border-color);"></div>
+            <div>
+              <div style="font-size: 24px; font-weight: 900; color: #f59e0b;" id="statsTotalGames">0</div>
+              <div style="font-size: 11px; color: var(--text-muted);">Totaal Gespeeld</div>
+            </div>
+            <div style="border-left: 1px solid var(--border-color);"></div>
+            <div>
+              <div style="font-size: 24px; font-weight: 900; color: #f87171;" id="statsP2Wins">0</div>
+              <div style="font-size: 11px; color: var(--text-muted);" id="statsP2Label">Speler 2 Wins</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Past matches list -->
+        <div id="pastMatchesList">
+          <div style="text-align: center; padding: 24px; color: var(--text-muted);">Nog geen wedstrijden gespeeld.</div>
+        </div>
+      </div>
+      <div class="modal-footer" style="justify-content: space-between;">
+        <button class="btn-danger" id="clearAllHistoryBtn">Geschiedenis Wissen</button>
+        <button class="btn-secondary" id="closeHistoryModalBtn2">Sluiten</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Android App Installation Guide Modal -->
+  <div class="modal-backdrop" id="androidInstallModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title">📲 Installeren op Android</div>
+        <button class="modal-close-btn" id="closeInstallModalBtn">&times;</button>
+      </div>
+      <div class="modal-body" style="line-height: 1.6;">
+        <p style="margin-bottom: 12px;">Deze app is gebouwd als een <strong>Progressive Web App (PWA)</strong> en kan direct geïnstalleerd worden op elke Android smartphone of tablet!</p>
+        
+        <div style="background: rgba(0,0,0,0.3); border-radius: var(--radius-md); padding: 14px; margin-bottom: 16px; border: 1px solid var(--border-color);">
+          <div style="font-weight: 700; color: #38bdf8; margin-bottom: 6px;">🎯 Stappen voor Android (Google Chrome):</div>
+          <ol style="padding-left: 20px; font-size: 13px;">
+            <li>Open deze website op je Android telefoon in <strong>Chrome</strong> of <strong>Samsung Internet</strong>.</li>
+            <li>Tik rechtsboven op het menu (<strong>⋮</strong> drie puntjes).</li>
+            <li>Tik op <strong>"Toevoegen aan startscherm"</strong> of <strong>"App installeren"</strong>.</li>
+            <li>De app verschijnt nu direct tussen je normale Android-apps met het 🎱 Pool logo!</li>
+          </ol>
+        </div>
+
+        <div style="font-size: 12px; color: var(--text-muted);">
+          ✨ <strong>Voordelen op Android:</strong>
+          <ul style="padding-left: 18px; margin-top: 4px;">
+            <li>Draait in volledig scherm zonder browser-balken.</li>
+            <li>Werkt 100% offline (geen internetverbinding nodig aan de biljarttafel).</li>
+            <li>Houdt het scherm automatisch wakker tijdens het spelen.</li>
+            <li>Voelbare trillingen (haptic feedback) bij scores.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary" id="confirmInstallPromptBtn">Installatie Starten</button>
+        <button class="btn-secondary" id="closeInstallModalBtn2">Sluiten</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Champion Celebration Modal -->
+  <div class="modal-backdrop" id="championModal">
+    <div class="modal-dialog" style="text-align: center;">
+      <div class="modal-body champion-banner">
+        <div class="champion-trophy">🏆</div>
+        <div class="champion-title" id="championTitle">Rignald is Kampioen!</div>
+        <div class="champion-subtitle" id="championSubtitle">Heeft als eerste 5 potjes gewonnen!</div>
+        <div style="margin-top: 20px; font-size: 18px; font-weight: 800; color: #38bdf8;" id="championScoreFinal">Stand: 5 - 3</div>
+      </div>
+      <div class="modal-footer" style="justify-content: center;">
+        <button class="btn-primary" id="closeChampionModalBtn">Gefeliciteerd! 🎱</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Element -->
+  <div class="toast-msg" id="toastMsg">
+    <span id="toastIcon">🎱</span>
+    <span id="toastText">Score opgeslagen</span>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
